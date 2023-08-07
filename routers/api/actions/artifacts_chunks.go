@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strings"
 	"time"
 
 	"code.gitea.io/gitea/models/actions"
@@ -67,7 +68,9 @@ func listChunksByRunID(st storage.ObjectStorage, runID int64) (map[int64][]*chun
 	var chunks []*chunkFileItem
 	if err := st.IterateObjects(storageDir, func(path string, obj storage.Object) error {
 		item := chunkFileItem{Path: path}
-		if _, err := fmt.Sscanf(path, storageDir+"/%d-%d-%d.chunk", &item.ArtifactID, &item.Start, &item.End); err != nil {
+
+		finePath := strings.Replace(path, "\\", "/", 1)
+		if _, err := fmt.Sscanf(finePath, storageDir+"/%d-%d-%d.chunk", &item.ArtifactID, &item.Start, &item.End); err != nil {
 			return fmt.Errorf("parse content range error: %v", err)
 		}
 		chunks = append(chunks, &item)

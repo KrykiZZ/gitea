@@ -133,7 +133,12 @@ func VerifyAuthWithOptions(options *VerifyOptions) func(ctx *context.Context) {
 			}
 		}
 
-		if options.SignInRequired {
+		ignoreSignInCheck := false
+		if strings.Contains(ctx.Req.URL.Path, "/actions/") && strings.Contains(ctx.Req.URL.Path, "/artifacts/") {
+			ignoreSignInCheck = true
+		}
+
+		if options.SignInRequired && !ignoreSignInCheck {
 			if !ctx.IsSigned {
 				if ctx.Req.URL.Path != "/user/events" {
 					middleware.SetRedirectToCookie(ctx.Resp, setting.AppSubURL+ctx.Req.URL.RequestURI())
